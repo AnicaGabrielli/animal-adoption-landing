@@ -1,129 +1,284 @@
-import { Animal, Adotante, Voluntario, Evento, ProcessoAdocao } from '@/types';
+// src/services/api.ts
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+import { Animal, ApiResponse, PaginatedResponse, AnimalFilters } from '@/types';
 
 class ApiService {
-  private async fetchWithErrorHandling<T>(endpoint: string): Promise<T> {
+  private baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+
+  // Dados mock para desenvolvimento
+  private mockAnimals: Animal[] = [
+    {
+      id: '1',
+      nome: 'Mel',
+      descricao: 'Uma cadelinha muito carinhosa e brincalhona, adora crianças e é muito obediente. Está procurando uma família que possa dar muito amor e carinho.',
+      idade: 2,
+      peso: 15,
+      cor: 'Dourado',
+      raca: 'Golden Retriever',
+      status: 'Disponível',
+      foto: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop',
+      telefone: '(11) 99999-9999',
+      email: 'contato@ongamor.com'
+    },
+    {
+      id: '2',
+      nome: 'Rex',
+      descricao: 'Um cão protetor e leal, ideal para famílias que buscam um companheiro fiel. Muito inteligente e fácil de treinar.',
+      idade: 4,
+      peso: 25,
+      cor: 'Preto',
+      raca: 'Pastor Alemão',
+      status: 'Disponível',
+      foto: 'https://images.unsplash.com/photo-1551717743-49959800b1f6?w=400&h=300&fit=crop',
+      telefone: '(11) 99999-9999',
+      email: 'contato@ongamor.com'
+    },
+    {
+      id: '3',
+      nome: 'Luna',
+      descricao: 'Uma gatinha muito independente e carinhosa, perfeita para apartamentos. Adora brincar e é muito limpa.',
+      idade: 1,
+      peso: 4,
+      cor: 'Cinza',
+      raca: 'Persa',
+      status: 'Em Processo',
+      foto: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop',
+      telefone: '(11) 99999-9999',
+      email: 'contato@ongamor.com'
+    },
+    {
+      id: '4',
+      nome: 'Thor',
+      descricao: 'Um cão forte e amigável, adora brincar e fazer exercícios ao ar livre. Ideal para pessoas ativas.',
+      idade: 3,
+      peso: 30,
+      cor: 'Marrom',
+      raca: 'Rottweiler',
+      status: 'Disponível',
+      foto: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=400&h=300&fit=crop',
+      telefone: '(11) 99999-9999',
+      email: 'contato@ongamor.com'
+    },
+    {
+      id: '5',
+      nome: 'Mimi',
+      descricao: 'Uma gatinha muito sociável e brincalhona, adora fazer novos amigos. Muito carinhosa e dócil.',
+      idade: 2,
+      peso: 3,
+      cor: 'Laranja',
+      raca: 'Siamês',
+      status: 'Disponível',
+      foto: 'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=400&h=300&fit=crop',
+      telefone: '(11) 99999-9999',
+      email: 'contato@ongamor.com'
+    },
+    {
+      id: '6',
+      nome: 'Buddy',
+      descricao: 'Um cão muito energético e inteligente, ideal para pessoas ativas. Adora aprender truques novos.',
+      idade: 5,
+      peso: 20,
+      cor: 'Tricolor',
+      raca: 'Border Collie',
+      status: 'Disponível',
+      foto: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=300&fit=crop',
+      telefone: '(11) 99999-9999',
+      email: 'contato@ongamor.com'
+    },
+    {
+      id: '7',
+      nome: 'Princesa',
+      descricao: 'Uma cadela muito elegante e carinhosa, ideal para quem busca um animal de companhia tranquilo.',
+      idade: 6,
+      peso: 8,
+      cor: 'Branco',
+      raca: 'Poodle',
+      status: 'Disponível',
+      foto: 'https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=400&h=300&fit=crop',
+      telefone: '(11) 99999-9999',
+      email: 'contato@ongamor.com'
+    },
+    {
+      id: '8',
+      nome: 'Simba',
+      descricao: 'Um gato muito majestoso e independente, perfeito para quem aprecia a personalidade felina.',
+      idade: 3,
+      peso: 5,
+      cor: 'Laranja',
+      raca: 'Maine Coon',
+      status: 'Disponível',
+      foto: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&h=300&fit=crop',
+      telefone: '(11) 99999-9999',
+      email: 'contato@ongamor.com'
+    }
+  ];
+
+  // Simula uma requisição HTTP
+  private async makeRequest<T>(
+    endpoint: string,
+    options?: RequestInit
+  ): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`);
+      // Simula delay de rede
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // Para desenvolvimento, sempre retorna dados mock
+      throw new Error('API em desenvolvimento');
       
-      return await response.json();
     } catch (error) {
-      console.error(`Error fetching ${endpoint}:`, error);
+      // Em caso de erro, retorna dados mock
+      console.warn('Usando dados mock:', error);
       throw error;
     }
   }
 
-  async getAnimals(): Promise<Animal[]> {
-    return this.fetchWithErrorHandling<Animal[]>('/api/animals');
+  // Buscar todos os animais
+  async getAnimals(filters?: AnimalFilters): Promise<Animal[]> {
+    try {
+      const response = await this.makeRequest<Animal[]>('/animals');
+      return response.data;
+    } catch (error) {
+      // Retorna dados mock filtrados
+      let filteredAnimals = [...this.mockAnimals];
+      
+      if (filters) {
+        if (filters.status) {
+          filteredAnimals = filteredAnimals.filter(animal => 
+            animal.status === filters.status
+          );
+        }
+        if (filters.raca) {
+          filteredAnimals = filteredAnimals.filter(animal => 
+            animal.raca.toLowerCase().includes(filters.raca!.toLowerCase())
+          );
+        }
+        if (filters.idadeMin !== undefined) {
+          filteredAnimals = filteredAnimals.filter(animal => 
+            animal.idade >= filters.idadeMin!
+          );
+        }
+        if (filters.idadeMax !== undefined) {
+          filteredAnimals = filteredAnimals.filter(animal => 
+            animal.idade <= filters.idadeMax!
+          );
+        }
+      }
+      
+      return filteredAnimals;
+    }
   }
 
-  async getAdotantes(): Promise<Adotante[]> {
-    return this.fetchWithErrorHandling<Adotante[]>('/api/adotantes');
+  // Buscar animal por ID
+  async getAnimalById(id: string): Promise<Animal | null> {
+    try {
+      const response = await this.makeRequest<Animal>(`/animals/${id}`);
+      return response.data;
+    } catch (error) {
+      const animal = this.mockAnimals.find(a => a.id === id);
+      return animal || null;
+    }
   }
 
-  async getVoluntarios(): Promise<Voluntario[]> {
-    return this.fetchWithErrorHandling<Voluntario[]>('/api/voluntarios');
+  // Criar novo animal
+  async createAnimal(animal: Omit<Animal, 'id' | 'created_at' | 'updated_at'>): Promise<Animal> {
+    try {
+      const response = await this.makeRequest<Animal>('/animals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(animal),
+      });
+      return response.data;
+    } catch (error) {
+      // Simula criação com dados mock
+      const newAnimal: Animal = {
+        ...animal,
+        id: Date.now().toString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      this.mockAnimals.push(newAnimal);
+      return newAnimal;
+    }
   }
 
-  async getEventos(): Promise<Evento[]> {
-    return this.fetchWithErrorHandling<Evento[]>('/api/eventos');
+  // Atualizar animal
+  async updateAnimal(id: string, updates: Partial<Animal>): Promise<Animal> {
+    try {
+      const response = await this.makeRequest<Animal>(`/animals/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+      return response.data;
+    } catch (error) {
+      // Simula atualização com dados mock
+      const index = this.mockAnimals.findIndex(a => a.id === id);
+      if (index === -1) {
+        throw new Error('Animal não encontrado');
+      }
+      
+      this.mockAnimals[index] = {
+        ...this.mockAnimals[index],
+        ...updates,
+        updated_at: new Date().toISOString(),
+      };
+      
+      return this.mockAnimals[index];
+    }
   }
 
-  async getProcessosAdocao(): Promise<ProcessoAdocao[]> {
-    return this.fetchWithErrorHandling<ProcessoAdocao[]>('/api/processos-adocao');
+  // Deletar animal
+  async deleteAnimal(id: string): Promise<void> {
+    try {
+      await this.makeRequest<void>(`/animals/${id}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      // Simula deleção com dados mock
+      const index = this.mockAnimals.findIndex(a => a.id === id);
+      if (index === -1) {
+        throw new Error('Animal não encontrado');
+      }
+      this.mockAnimals.splice(index, 1);
+    }
   }
 
-  // Métodos para dados mockados (fallback)
+  // Método para obter dados mock (para desenvolvimento)
   getMockAnimals(): Animal[] {
-    return [
-      {
-        id: 1,
-        nome: "Buddy",
-        especie: "Cachorro",
-        raca: "Golden Retriever",
-        idade: 3,
-        peso: 25.5,
-        cor: "Dourado",
-        descricao: "Cão muito amigável e brincalhão, ideal para famílias com crianças.",
-        status: "Disponível",
-        foto: "https://images.unsplash.com/photo-1552053831-71594a27632d?w=300&h=300&fit=crop",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-15T10:30:00Z"
-      },
-      {
-        id: 2,
-        nome: "Luna",
-        especie: "Gato",
-        raca: "Siamês",
-        idade: 2,
-        peso: 4.2,
-        cor: "Cinza e Branco",
-        descricao: "Gata carinhosa e tranquila, perfeita para apartamentos.",
-        status: "Disponível",
-        foto: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&h=300&fit=crop",
-        createdAt: "2024-01-10T14:20:00Z",
-        updatedAt: "2024-01-10T14:20:00Z"
-      }
-    ];
+    return [...this.mockAnimals];
   }
 
-  getMockEventos(): Evento[] {
-    return [
-      {
-        id: 1,
-        nome: "Feira de Adoção - Shopping Center",
-        descricao: "Grande evento de adoção com mais de 50 animais disponíveis",
-        data: "2024-02-15",
-        hora: "09:00",
-        local: "Shopping Center - Praça Central",
-        responsavel: "Maria Silva",
-        createdAt: "2024-01-20T09:00:00Z",
-        updatedAt: "2024-01-20T09:00:00Z"
-      },
-      {
-        id: 2,
-        nome: "Campanha de Vacinação",
-        descricao: "Vacinação gratuita para pets adotados",
-        data: "2024-02-20",
-        hora: "14:00",
-        local: "Clínica Veterinária Amor Animal",
-        responsavel: "Dr. João Santos",
-        createdAt: "2024-01-22T11:30:00Z",
-        updatedAt: "2024-01-22T11:30:00Z"
-      }
-    ];
-  }
-
-  getMockVoluntarios(): Voluntario[] {
-    return [
-      {
-        id: 1,
-        nome: "Ana Costa",
-        email: "ana@email.com",
-        telefone: "(11) 99999-1234",
-        area_interesse: "Cuidados veterinários",
-        disponibilidade: "Fins de semana",
-        experiencia: "3 anos como voluntária em ONGs",
-        createdAt: "2024-01-15T10:30:00Z",
-        updatedAt: "2024-01-15T10:30:00Z"
-      },
-      {
-        id: 2,
-        nome: "Carlos Oliveira",
-        email: "carlos@email.com",
-        telefone: "(11) 88888-5678",
-        area_interesse: "Transporte e eventos",
-        disponibilidade: "Tardes da semana",
-        experiencia: "Novo voluntário, muito motivado",
-        createdAt: "2024-01-18T16:45:00Z",
-        updatedAt: "2024-01-18T16:45:00Z"
-      }
-    ];
+  // Buscar animais com paginação
+  async getAnimalsPaginated(
+    page: number = 1,
+    limit: number = 10,
+    filters?: AnimalFilters
+  ): Promise<PaginatedResponse<Animal>> {
+    try {
+      const response = await this.makeRequest<PaginatedResponse<Animal>>(
+        `/animals?page=${page}&limit=${limit}`
+      );
+      return response.data;
+    } catch (error) {
+      // Simula paginação com dados mock
+      const animals = await this.getAnimals(filters);
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedAnimals = animals.slice(startIndex, endIndex);
+      
+      return {
+        data: paginatedAnimals,
+        total: animals.length,
+        page,
+        limit,
+        hasNext: endIndex < animals.length,
+        hasPrev: page > 1,
+      };
+    }
   }
 }
 
